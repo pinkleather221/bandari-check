@@ -15,11 +15,11 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.40.0",
     "@libsql/client": "^0.14.0",
-    "drizzle-orm": "^0.38.0",
+    "drizzle-orm": "^0.45.4",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "zod": "^3.24.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -30,5 +30,7 @@
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
-  }
+  },
+  "license": "MIT",
+  "description": "Audits Kenyan import shipping documents for mismatches before customs entry at Mombasa"
 }

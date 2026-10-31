@@ -132,4 +132,6 @@ This project was built with Claude Code, using subagents defined in [.claude/age
 
 ## Disclaimer
 
+Released under the [MIT License](LICENSE).
+
 Decision support only. Bandari Check does not give legal or customs advice. A licensed clearing agent decides what to lodge.

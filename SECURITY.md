@@ -18,3 +18,10 @@ Known trade-offs: `style-src 'unsafe-inline'` (Next injects inline styles); the 
 
 ## Before a real pilot
 HTTPS, real auth (SSO or magic link) with per-user quotas, Kenya Data Protection Act review and processor terms, structured audit logging, an independent review (run the `security-reviewer` subagent, then a human).
+
+## Reporting a vulnerability
+Please do not open a public issue. Use GitHub's private reporting: the **Security** tab of this repository, then **Report a vulnerability**. Include steps to reproduce and use synthetic data only.
+
+## Known issues
+- `npm audit` reports a vulnerability in the PostCSS copy bundled with Next.js 15. It is only used at build time on this project's own CSS. Fixing it needs a Next.js major upgrade, which is planned.
+- Open items from the first review are listed in [docs/SECURITY_REVIEW.md](docs/SECURITY_REVIEW.md).
