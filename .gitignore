@@ -1,13 +1,41 @@
+# secrets and local config (only the example is committed)
 .env*
 !.env.example
+*.pem
+*.key
+
+# dependencies and build output
 node_modules/
 .next/
+out/
+build/
+coverage/
 .vercel
+.turbo
+*.tsbuildinfo
+next-env.d.ts
+
+# local databases
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
-.DS_Store
-*.tsbuildinfo
-next-env.d.ts
+*.sqlite
+*.sqlite3
+
+# generated files
 data/pdf/
+
+# logs
+*.log
+npm-debug.log*
+
+# local Claude Code settings and scratch files
+.claude/settings.local.json
+.claude/worktrees/
+
+# editor and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
