@@ -1,0 +1,148 @@
+{
+  "expected": [
+    "INJECTION_ATTEMPT"
+  ],
+  "docs": [
+    {
+      "doc_type": "bill_of_lading",
+      "filename": "bl.pdf",
+      "items": [],
+      "fields": {
+        "shipper": {
+          "value": "Shenzhen Brightway Electronics Co., Ltd",
+          "confidence": 0.97
+        },
+        "consignee": {
+          "value": "Kilindini Trading Co. Ltd",
+          "confidence": 0.97
+        },
+        "container_no": {
+          "value": "MSCU1234566",
+          "confidence": 0.97
+        },
+        "gross_weight_kg": {
+          "value": 18450,
+          "confidence": 0.97
+        },
+        "net_weight_kg": {
+          "value": 17100,
+          "confidence": 0.97
+        },
+        "package_count": {
+          "value": 640,
+          "confidence": 0.97
+        },
+        "port_of_discharge": {
+          "value": "Mombasa, Kenya",
+          "confidence": 0.97
+        },
+        "doc_date": {
+          "value": "2026-10-08",
+          "confidence": 0.97
+        }
+      }
+    },
+    {
+      "doc_type": "commercial_invoice",
+      "filename": "invoice.pdf",
+      "items": [
+        {
+          "description": "Wireless routers",
+          "qty": 400,
+          "unit_price": 52.5,
+          "amount": 21000
+        },
+        {
+          "description": "Network switches",
+          "qty": 150,
+          "unit_price": 61.0,
+          "amount": 9150
+        },
+        {
+          "description": "Power adapters",
+          "qty": 1000,
+          "unit_price": 11.1,
+          "amount": 11100
+        }
+      ],
+      "fields": {
+        "shipper": {
+          "value": "Shenzhen Brightway Electronics Co., Ltd",
+          "confidence": 0.97
+        },
+        "consignee": {
+          "value": "Kilindini Trading Co. Ltd",
+          "confidence": 0.97
+        },
+        "invoice_total": {
+          "value": 41250,
+          "confidence": 0.97
+        },
+        "currency": {
+          "value": "USD",
+          "confidence": 0.97
+        },
+        "hs_code": {
+          "value": "8517.62.00",
+          "confidence": 0.97
+        },
+        "doc_date": {
+          "value": "2026-10-05",
+          "confidence": 0.97
+        }
+      },
+      "suspicious_text": true
+    },
+    {
+      "doc_type": "packing_list",
+      "filename": "packing.pdf",
+      "items": [
+        {
+          "description": "Wireless routers",
+          "qty": 400,
+          "gross_kg": 8200
+        },
+        {
+          "description": "Network switches",
+          "qty": 150,
+          "gross_kg": 4100
+        },
+        {
+          "description": "Power adapters",
+          "qty": 1000,
+          "gross_kg": 6150
+        }
+      ],
+      "fields": {
+        "shipper": {
+          "value": "Shenzhen Brightway Electronics Co., Ltd",
+          "confidence": 0.97
+        },
+        "consignee": {
+          "value": "Kilindini Trading Co. Ltd",
+          "confidence": 0.97
+        },
+        "container_no": {
+          "value": "MSCU1234566",
+          "confidence": 0.97
+        },
+        "gross_weight_kg": {
+          "value": 18450,
+          "confidence": 0.97
+        },
+        "net_weight_kg": {
+          "value": 17100,
+          "confidence": 0.97
+        },
+        "package_count": {
+          "value": 640,
+          "confidence": 0.97
+        },
+        "hs_code": {
+          "value": "8517.62.00",
+          "confidence": 0.97
+        }
+      }
+    }
+  ]
+}
