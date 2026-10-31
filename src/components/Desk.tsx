@@ -58,7 +58,7 @@ export default function Desk() {
     const r = await fetch("/api/approve", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: report.report_id, name: who }) });
     const j = await r.json().catch(() => null);
     if (!r.ok) { setStatus({ text: j?.detail ?? "Could not save the approval.", err: true }); return; }
-    setApprovedBy(who.trim()); setTimeout(() => window.print(), 50);
+    setApprovedBy(who.trim()); setTimeout(() => window.print(), 200);
   }
   async function copy() {
     try { await navigator.clipboard.writeText(msg); setStatus({ text: "Message copied." }); }
@@ -122,7 +122,10 @@ export default function Desk() {
         {!report ? (
           <div className="empty"><div className="stamp ghost" aria-hidden="true"><span>Verdict</span></div><p>{t.empty}</p></div>
         ) : (
-          <div>
+          <div className={approvedBy ? "approved" : "draft"}>
+            <p className="printmark" role="note">{approvedBy
+              ? `APPROVED by ${approvedBy} (typed name, identity not verified). Integrity ${report.sha256.slice(0, 16)}. Decision support only.`
+              : "DRAFT, NOT APPROVED. Do not lodge or rely on this printout until a person signs off in the app."}</p>
             <div className="verdict">
               <div key={report.report_id} className={`stamp thunk ${{ GO: "go", REVIEW: "review", NO_GO: "nogo" }[report.verdict]}`}><span>{t[report.verdict]}</span></div>
               <dl className="kpis">
@@ -163,7 +166,9 @@ export default function Desk() {
               <legend>{t.approve}</legend>
               <label className="check"><input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /><span>I compared this report with the original documents.</span></label>
               <label className="name">Name <input type="text" maxLength={60} autoComplete="name" value={who} onChange={(e) => setWho(e.target.value)} /></label>
-              <button className="btn primary" type="button" disabled={!agree || who.trim().length < 2} onClick={approve}>Approve and print clearance pack</button>
+              <button className="btn primary" type="button" disabled={!agree || who.trim().length < 2 || report.saved === false} onClick={approve}>Approve and print clearance pack</button>
+              {report.saved === false && <span className="fine">This report could not be saved, so it cannot be approved. Run the audit again.</span>}
+              <span className="fine">Approval records the typed name only; it does not verify who you are. Copy and send the message above before sign-off to get documents corrected. The printed pack is marked DRAFT until approved.</span>
             </fieldset>
             <p className="fine">
               Report {report.report_id} · {report.mode === "live" ? "live read" : "sample data"} · {report.generated_at} · integrity {report.sha256.slice(0, 16)}…

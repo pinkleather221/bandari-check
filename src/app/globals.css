@@ -95,8 +95,12 @@ input[type=text]{padding:8px 10px;border:2px solid var(--line);background:var(--
 input[type=checkbox]{width:20px;height:20px;accent-color:var(--sea);margin-top:2px}
 .scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.9rem;background:var(--paper)}
 th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}th{font-weight:600;color:var(--mute)}
+.printmark{display:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media print{
   body{background:#fff;color:#000}.wall,.intake>*:not(.sheets),.seg,.row,.gate,.skip,footer,.empty{display:none!important}
+  .printmark{display:block!important;border:3px solid #000;padding:10px 14px;margin:0 0 14px;font-weight:700;text-align:center}
+  .draft .printmark{background:#000;color:#fff}
+  .draft .result::before{content:"DRAFT, NOT APPROVED";position:fixed;top:40%;left:0;right:0;text-align:center;font:700 4rem sans-serif;color:rgba(0,0,0,.12);transform:rotate(-25deg);pointer-events:none}
   .desk{display:block}.finding .fb{display:block!important}.sheet{break-inside:avoid}
 }

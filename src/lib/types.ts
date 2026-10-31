@@ -17,5 +17,5 @@ export type Scored = {
 export type Messages = { message_en: string; message_sw: string; source: "claude" | "template" };
 export type Report = Scored & {
   report_id: string; generated_at: string; mode: "live" | "demo"; documents: Doc[]; findings: Finding[];
-  counts: Record<Severity, number>; messages: Messages; notice: string; sha256: string;
+  counts: Record<Severity, number>; messages: Messages; notice: string; sha256: string; saved?: boolean;
 };

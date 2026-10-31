@@ -1,4 +1,4 @@
-import { desc, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getDb, purgeExpired } from "@/db";
 import { audits } from "@/db/schema";
 export const dynamic = "force-dynamic";
@@ -14,9 +14,9 @@ export default async function History() {
     const [s] = await db.select({
       n: sql<number>`count(*)`, blockers: sql<number>`coalesce(sum(${audits.blockers}),0)`,
       saved: sql<number>`coalesce(sum(case when ${audits.blockers} > 0 then ${audits.exposureUsd} else 0 end),0)`,
-    }).from(audits);
+    }).from(audits).where(eq(audits.mode, "live")); // sample runs are not impact
     stats = s;
-  } catch (e) { console.error(e); error = "The history database is not reachable. Check DATABASE_URL."; }
+  } catch (e) { console.error("history failed", e instanceof Error ? e.message : "error"); error = "The history database is not reachable. Check DATABASE_URL."; }
 
   return (
     <main id="main" className="wrap page">
@@ -24,7 +24,7 @@ export default async function History() {
       <p className="lede">Every audit is saved without the original files. Reports are deleted after {process.env.RETENTION_DAYS ?? 30} days.</p>
       {error && <p className="status err">{error}</p>}
       <dl className="kpis big">
-        <div><dt>Audits run</dt><dd>{stats.n}</dd></div>
+        <div><dt>Live audits run</dt><dd>{stats.n}</dd></div>
         <div><dt>Blockers caught before lodging</dt><dd>{stats.blockers}</dd></div>
         <div><dt>Demurrage exposure flagged (illustrative)</dt><dd>≈ USD {Number(stats.saved).toLocaleString("en-US")}</dd></div>
       </dl>

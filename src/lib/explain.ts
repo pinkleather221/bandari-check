@@ -1,6 +1,7 @@
 // Claude drafts plain-language reasons and the supplier message (EN + Swahili). Templates when offline.
 import type Anthropic from "@anthropic-ai/sdk";
 import { model } from "./anthropic";
+import { clean } from "./security";
 import type { Doc, Finding, Messages } from "./types";
 
 const SYSTEM = `You help a Kenyan clearing agent at Mombasa port. You receive audit findings already computed by code as JSON.
@@ -16,6 +17,8 @@ const TOOL: Anthropic.Tool = {
     message_en: s, message_sw: s } },
 };
 
+// Model-written text is untrusted: no links, emails or phone numbers (a document could plant them), no control or bidi characters.
+const scrub = (v: unknown, n: number, nl = false) => clean(v, n * 2, nl).replace(/(https?:\/\/|www\.)\S+|\b\S+@\S+\.\S+|\+?\d[\d\s().-]{8,}\d/gi, "[removed]").slice(0, n);
 const container = (docs: Doc[]) => String(docs.map((d) => d.fields.container_no?.value).find(Boolean) ?? "the shipment");
 
 export function template(findings: Finding[], docs: Doc[]): Messages {
@@ -36,16 +39,17 @@ export async function compose(client: Anthropic | null, findings: Finding[], doc
     const r = await client.messages.create({
       model: model(), max_tokens: 2000, system: SYSTEM, tools: [TOOL], tool_choice: { type: "tool", name: "submit_report" },
       messages: [{ role: "user", content: JSON.stringify({ container: container(docs), findings: payload }) }],
-    });
+    }, { signal: AbortSignal.timeout(12_000) });
     const call = r.content.find((b) => b.type === "tool_use");
     if (!call || call.type !== "tool_use") return out;
-    const d = call.input as { why?: { id: string; en: string; sw: string }[]; message_en?: string; message_sw?: string };
+    const d = call.input as { why?: unknown; message_en?: unknown; message_sw?: unknown };
     const ids = new Set(findings.map((f) => f.id));
-    for (const w of d.why ?? []) if (ids.has(w.id)) {
-      const f = findings.find((x) => x.id === w.id)!;
-      f.why = { en: String(w.en).slice(0, 400), sw: String(w.sw).slice(0, 400) };
+    for (const w of Array.isArray(d.why) ? d.why : []) {
+      if (!w || typeof w !== "object" || typeof w.id !== "string" || !ids.has(w.id) || typeof w.en !== "string" || typeof w.sw !== "string") continue;
+      findings.find((x) => x.id === w.id)!.why = { en: scrub(w.en, 400), sw: scrub(w.sw, 400) };
     }
-    if (d.message_en && d.message_sw) return { source: "claude", message_en: String(d.message_en).slice(0, 2500), message_sw: String(d.message_sw).slice(0, 2500) };
+    if (typeof d.message_en === "string" && typeof d.message_sw === "string" && d.message_en && d.message_sw)
+      return { source: "claude", message_en: scrub(d.message_en, 2500, true), message_sw: scrub(d.message_sw, 2500, true) };
   } catch { /* the writing step must never fail the audit */ }
   return out;
 }

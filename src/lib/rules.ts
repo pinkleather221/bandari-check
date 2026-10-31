@@ -181,7 +181,7 @@ export function run(docs: Doc[]): Finding[] {
     `Bill of lading discharge port: ${pod}.`, `Bandari ya kushusha kwenye bili: ${pod}.`, [ev(BL, "port_of_discharge")]);
 
   // 10. prompt-injection tripwire
-  for (const d of Object.values(by)) if (d!.suspicious_text) add("INJECTION_ATTEMPT", "warn", "Document contains text aimed at an AI",
+  for (const d of Object.values(by)) if (d!.suspicious_text) add("INJECTION_ATTEMPT", "blocker", "Document contains text aimed at an AI",
     "This document contains instructions addressed to an AI system. They were ignored; treat the document with suspicion.",
     "Nyaraka hii ina maagizo yanayolenga mfumo wa AI. Yamepuuzwa; ichukulie kwa tahadhari.",
     [{ doc: d!.doc_type, field: "text", value: "hidden instruction" }]);

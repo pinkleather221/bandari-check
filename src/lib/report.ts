@@ -9,15 +9,16 @@ import type { Doc, Report } from "./types";
 export async function buildReport(documents: Doc[], mode: "live" | "demo", client: Anthropic | null): Promise<Report> {
   const findings = run(documents);
   const sc = score(findings);
-  const messages = await compose(client, findings, documents);
+  const messages = await compose(mode === "live" ? client : null, findings, documents); // samples never spend live tokens
   const counts = { blocker: 0, warn: 0, info: 0 };
   for (const f of findings) counts[f.severity]++;
-  const body = { report_id: randomUUID().replace(/-/g, "").slice(0, 10), generated_at: new Date().toISOString().slice(0, 19) + "Z", mode,
+  const body = { report_id: randomUUID().replace(/-/g, ""), generated_at: new Date().toISOString().slice(0, 19) + "Z", mode,
     documents, findings, counts, ...sc, messages, notice: "Decision support only. A licensed agent must verify against the original documents before lodging." };
   const sha256 = createHash("sha256").update(JSON.stringify(body)).digest("hex");
   const report: Report = { ...body, sha256 };
-  await persist(report).catch((e) => console.error("persist failed", e)); // the audit still returns if the DB is down
-  return report;
+  // The audit still returns if the DB is down, but saved:false tells the UI that approval is unavailable. saved is outside the hash.
+  const saved = await persist(report).then(() => true, (e) => { console.error("persist failed", e instanceof Error ? e.message : "error"); return false; });
+  return { ...report, saved };
 }
 
 async function persist(r: Report) {

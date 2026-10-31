@@ -2,7 +2,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { model } from "./anthropic";
 import type { Doc, DocType, Fld, Item } from "./types";
-import type { Mime } from "./security";
+import { clean, type Mime } from "./security";
 
 export const DOC_TYPES: DocType[] = ["bill_of_lading", "commercial_invoice", "packing_list"];
 export const FIELDS = ["shipper", "consignee", "container_no", "gross_weight_kg", "net_weight_kg", "package_count",
@@ -34,7 +34,16 @@ const TOOL: Anthropic.Tool = {
   },
 };
 
-const str = (v: unknown, n = 160) => (v == null ? null : String(v).replace(/\0/g, "").slice(0, n));
+const str = (v: unknown, n = 160) => (v == null ? null : clean(v, n) || null);
+// Format gates for fields that feed rules and prompts: a value of the wrong shape is dropped (reported as missing), not passed on.
+const SHAPE: Record<string, [RegExp, (s: string) => string]> = {
+  container_no: [/^[A-Z0-9]{4,15}$/, (s) => s.toUpperCase().replace(/[\s-]/g, "")],
+  currency: [/^[A-Z]{3}$/, (s) => s.toUpperCase()],
+  doc_date: [/^\d{4}-\d{2}-\d{2}$/, (s) => s],
+  hs_code: [/^[\d. ]{4,16}$/, (s) => s],
+};
+// Deterministic injection tripwire over every extracted string, independent of the model's own suspicious_text flag.
+export const INJECTION = /ignore (all |any |the )?(previous|prior|above|earlier)|disregard (all |any |the )?(previous|prior|above|instructions)|system prompt|new instructions|you are (now )?(an? )?(ai|assistant|llm|language model)|(mark|set|treat)\b.{0,30}\b(approved|cleared|clean|go)\b|\bapprove (this|the|it)\b|do not (flag|report|mention)|<\/?(system|assistant|instructions?)>/i;
 const nn = (v: unknown) => { const n = Number(v); return v == null || v === "" || !Number.isFinite(n) ? null : n; };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -44,16 +53,20 @@ export function sanitise(raw: any, filename: string): Doc {
   for (const k of FIELDS) {
     const o = raw.fields?.[k];
     if (o && typeof o === "object" && o.value != null && o.value !== "") {
-      const value = NUMERIC.has(k) ? nn(o.value) : str(o.value);
+      let value = NUMERIC.has(k) ? nn(o.value) : str(o.value);
+      const sh = SHAPE[k];
+      if (typeof value === "string" && sh) { value = sh[1](value); if (!sh[0].test(value)) value = null; }
       if (value !== null) fields[k] = { value, confidence: Math.max(0, Math.min(1, nn(o.confidence) ?? 0)) };
     }
   }
   const items: Item[] = (Array.isArray(raw.items) ? raw.items : []).slice(0, 60).filter((i: unknown) => i && typeof i === "object")
     .map((i: any) => ({ description: str(i.description, 80) ?? "?", qty: nn(i.qty), unit_price: nn(i.unit_price), amount: nn(i.amount), gross_kg: nn(i.gross_kg) }));
-  return { doc_type: raw.doc_type, filename: str(filename, 80) ?? "document", fields, items, suspicious_text: !!raw.suspicious_text };
+  const texts = [...Object.values(fields).map((f) => f.value), ...items.map((i) => i.description)];
+  const tripped = texts.some((t) => typeof t === "string" && INJECTION.test(t));
+  return { doc_type: raw.doc_type, filename: str(filename, 80) || "document", fields, items, suspicious_text: !!raw.suspicious_text || tripped };
 }
 
-export async function extract(client: Anthropic, filename: string, mime: Mime, bytes: Uint8Array): Promise<Doc> {
+export async function extract(client: Anthropic, filename: string, mime: Mime, bytes: Uint8Array, signal?: AbortSignal): Promise<Doc> {
   const data = Buffer.from(bytes).toString("base64");
   const block: Anthropic.ContentBlockParam = mime === "application/pdf"
     ? { type: "document", source: { type: "base64", media_type: "application/pdf", data } }
@@ -61,7 +74,7 @@ export async function extract(client: Anthropic, filename: string, mime: Mime, b
   const r = await client.messages.create({
     model: model(), max_tokens: 2500, system: SYSTEM, tools: [TOOL], tool_choice: { type: "tool", name: "submit_extraction" },
     messages: [{ role: "user", content: [block, { type: "text", text: "Transcribe this document by calling submit_extraction." }] }],
-  });
+  }, { signal });
   const call = r.content.find((b) => b.type === "tool_use");
   if (!call || call.type !== "tool_use") throw new Error("no extraction returned");
   return sanitise(call.input, filename);

@@ -65,9 +65,13 @@ The local SQLite database is created automatically at `data/bandari.db`.
 | `DATABASE_URL` | libSQL URL (`file:` locally, `libsql://` on Turso) | `file:./data/bandari.db` |
 | `DATABASE_AUTH_TOKEN` | Turso auth token | none |
 | `BASIC_AUTH_PASS` | Password for the whole app (any username) | none |
+| `BASIC_AUTH_USER` | Also require this username | none (any username) |
 | `ALLOW_PUBLIC` | Set to `1` to allow production without a password | none |
 | `DEMURRAGE_USD_PER_DAY` | Rate used for the exposure estimate | `75` |
 | `AUDIT_RATE_PER_MIN` | Audits per minute per client | `6` |
+| `AUDIT_DAILY_CAP` | Live audits per UTC day (per process; samples are not counted) | `200` |
+| `MAX_INFLIGHT` | Concurrent live audits (per process) | `3` |
+| `MAX_PDF_PAGES` | Longest PDF accepted | `20` |
 | `MAX_FILE_MB` | Max size per uploaded file | `8` |
 | `RETENTION_DAYS` | Reports are deleted after this many days | `30` |
 
