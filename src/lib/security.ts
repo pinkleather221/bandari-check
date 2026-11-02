@@ -1,4 +1,4 @@
-// Per-process limiter. For multi-instance deployments move this to Redis/Turso (see SECURITY.md).
+// Per-process limiter. For multi-instance deployments move this to Redis/Turso.
 const hits = new Map<string, number[]>();
 // Drop expired buckets first; only if still over the cap drop the oldest-inserted keys.
 function evict(now: number) {
