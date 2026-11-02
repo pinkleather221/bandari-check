@@ -125,14 +125,17 @@ This is an early build. Be aware of the following:
 
 - **Live reading of real scans is not yet validated.** Extraction accuracy on real documents has not been measured.
 - All sample data is synthetic. Never commit real customs documents.
-- A first security review is in [docs/SECURITY_REVIEW.md](docs/SECURITY_REVIEW.md). Some items are fixed and some are still open.
-- Run it behind `BASIC_AUTH_PASS` if you deploy it.
+- Run it behind `BASIC_AUTH_PASS` if you deploy it, and set a spend limit on your Anthropic account.
 
-See [SECURITY.md](SECURITY.md) for the security design.
+## Security
+
+Uploads are size-capped and checked by file signature, documents are treated as untrusted input, model output is validated, and all API routes are rate-limited. Responses carry a strict Content Security Policy and security headers.
+
+To report a vulnerability, please do not open a public issue. Use the **Security** tab of this repository, then **Report a vulnerability**, and include steps to reproduce using synthetic data only.
 
 ## Built with Claude Code
 
-This project was built with Claude Code, using subagents defined in [.claude/agents](.claude/agents) (planner, builder, rules-auditor, security-reviewer, ux-designer, qa-demo) that coordinate through [MEMORY.md](MEMORY.md).
+This project was built with Claude Code, using a team of subagents (planner, builder, rules-auditor, security-reviewer, ux-designer, qa-demo) coordinated through a shared project memory file.
 
 ## Disclaimer
 

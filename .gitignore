@@ -39,3 +39,11 @@ npm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# internal docs and tooling: only README.md is published
+*.md
+!README.md
+!.github/ISSUE_TEMPLATE/*.md
+docs/
+.claude/
+scripts/memory-guard.mjs
